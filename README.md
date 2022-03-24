@@ -1,6 +1,6 @@
 # HypixelAuctionHelper
 
-Fetches the Hypixel skyblock API and insters it into a SQLite database !
+Fetches the Hypixel skyblock API and inserts it into a SQLite database !
 
 Current plans :
 - Implement a clear function, removing outdated auctions from the database (those with outdated timestamps or found in `auctions_ended` provided by the API)
