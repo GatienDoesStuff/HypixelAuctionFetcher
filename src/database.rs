@@ -39,24 +39,21 @@ pub fn init() {
 
 
 
-pub fn append(auctions:&Vec<Value>) {
+pub fn append(page:&Value) {
 
     let mut conn = Connection::open("./data/auctions.db").expect("Something went wrong trying to open the database");
 
     let tx = conn.transaction().expect("Couldn't create transaction");
 
-    println!("doing database stuff");
-    for page in auctions {
-        for sale in page["auctions"].as_array().expect("The json provided by the API is borked") {
-            let _ = tx.execute(
-                "insert into active_auctions (auction_uuid, ends, item_id, item_name, item_bytes, price) values (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![sale["uuid"].as_str().unwrap(),
-                        sale["end"].as_u64().unwrap(),
-                        sale["extra"].as_str().unwrap(),
-                        sale["item_name"].as_str().unwrap(),
-                        sale["item_bytes"].as_str().unwrap(),
-                        sale["starting_bid"].as_u64().unwrap()],);
-            }
+    for sale in page["auctions"].as_array().expect("The json provided by the API is borked") {
+        let _ = tx.execute(
+            "insert into active_auctions (auction_uuid, ends, item_id, item_name, item_bytes, price) values (?1, ?2, ?3, ?4, ?5, ?6)",
+            params![sale["uuid"].as_str().unwrap(),
+                    sale["end"].as_u64().unwrap(),
+                    sale["extra"].as_str().unwrap(),
+                    sale["item_name"].as_str().unwrap(),
+                    sale["item_bytes"].as_str().unwrap(),
+                    sale["starting_bid"].as_u64().unwrap()],);
     }
     tx.commit().unwrap(); //If this returns an error, blame me
 }

@@ -33,18 +33,17 @@ async fn main() {
 
     let j:u64 = page0["totalPages"].as_u64().unwrap();
 
+	database::append(&page0);
+	eprintln!("Fetched and appended page 0 of the auction house to the database. There are {} pages", j);
+
     let stream = futures::stream::iter(1..j)
-        .map(|page| {println!("started fetching page {}",page);auction_fetch(page)})
+        .map(|page| {eprintln!("started fetching page {}",page);auction_fetch(page)})
         .buffer_unordered(3);
 
-    let stream = stream.then(|b| async { match b {
-        Err(e) => panic!("Couldn't join task. This should not happen : {}",e),
-        Ok(val) => val,
+    let _ = stream.for_each(|b| async { match b {
+        Err(e) => panic!("Something went wrong : {}",e),
+        Ok(val) => database::append(&val),
         }
-    });
-
-    let mut auction_contents:Vec<Value> = stream.collect::<Vec<Value>>().await;
-    auction_contents.push(page0);
-
-    database::append(&auction_contents);
+    })
+    .await;
 }
